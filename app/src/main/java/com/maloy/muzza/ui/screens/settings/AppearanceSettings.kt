@@ -104,6 +104,29 @@ import com.maloy.muzza.utils.rememberEnumPreference
 import com.maloy.muzza.utils.rememberPreference
 import me.saket.squiggles.SquigglySlider
 
+
+
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.height
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
+
+import androidx.compose.foundation.shape.CircleShape
+
+import androidx.compose.material3.Surface
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.graphics.Color
+
+
+
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,8 +178,12 @@ fun AppearanceSettings(
             defaultValue = PlayerBackgroundStyle.DEFAULT,
         )
 
-
     var showCornerRadiusDialog by remember {
+        mutableStateOf(false)
+    }
+
+    // State to control the visibility of the ThemePicker and Pure Black switch
+    var showThemeOptionsExpanded by remember {
         mutableStateOf(false)
     }
 
@@ -327,6 +354,28 @@ fun AppearanceSettings(
     ) {
         Spacer(Modifier.windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)))
 
+        // Add Lottie animation at the top
+        var visible by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            visible = true
+        }
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.theme))
+            LottieAnimation(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+        }
+
         PreferenceGroupTitle(
             title = stringResource(R.string.theme)
         )
@@ -338,31 +387,42 @@ fun AppearanceSettings(
             onCheckedChange = onDynamicThemeChange
         )
 
-        EnumListPreference(
-            title = { Text(stringResource(R.string.dark_theme)) },
-            icon = { Icon(painterResource(R.drawable.dark_mode), null) },
-            selectedValue = darkMode,
-            onValueSelected = onDarkModeChange,
-            valueText = {
-                when (it) {
-                    DarkMode.ON -> stringResource(R.string.dark_theme_on)
-                    DarkMode.OFF -> stringResource(R.string.dark_theme_off)
-                    DarkMode.AUTO -> stringResource(R.string.dark_theme_follow_system)
-                }
-            }
+        // HyperOS theme selector with expandable animation
+        HyperOSListItem(
+            title = stringResource(R.string.dark_theme),
+            value = when (darkMode) {
+                DarkMode.ON -> stringResource(R.string.dark_theme_on)
+                DarkMode.OFF -> stringResource(R.string.dark_theme_off)
+                DarkMode.AUTO -> stringResource(R.string.dark_theme_follow_system)
+            },
+            leadingContent = { Icon(painterResource(R.drawable.dark_mode), null) },
+            onClick = { showThemeOptionsExpanded = !showThemeOptionsExpanded }
         )
 
-        AnimatedVisibility(useDarkTheme) {
-            SwitchPreference(
-                title = { Text(stringResource(R.string.pure_black)) },
-                icon = { Icon(painterResource(R.drawable.contrast), null) },
-                checked = pureBlack,
-                onCheckedChange = { checked ->
-                    if (useDarkTheme) {
-                        onPureBlackChange(checked)
-                    }
+        AnimatedVisibility(
+            visible = showThemeOptionsExpanded,
+            enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+            exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
+        ) {
+            Column {
+                ThemePicker(
+                    currentTheme = darkMode,
+                    onThemeSelected = onDarkModeChange
+                )
+
+                AnimatedVisibility(useDarkTheme) {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.pure_black)) },
+                        icon = { Icon(painterResource(R.drawable.contrast), null) },
+                        checked = pureBlack,
+                        onCheckedChange = { checked ->
+                            if (useDarkTheme) {
+                                onPureBlackChange(checked)
+                            }
+                        }
+                    )
                 }
-            )
+            }
         }
 
         EnumListPreference(
@@ -591,13 +651,13 @@ fun AppearanceSettings(
             icon = { Icon(painterResource(R.drawable.list), null) },
             selectedValue = defaultChip,
             values =
-            listOf(
-                LibraryFilter.LIBRARY,
-                LibraryFilter.PLAYLISTS,
-                LibraryFilter.SONGS,
-                LibraryFilter.ALBUMS,
-                LibraryFilter.ARTISTS,
-            ),
+                listOf(
+                    LibraryFilter.LIBRARY,
+                    LibraryFilter.PLAYLISTS,
+                    LibraryFilter.SONGS,
+                    LibraryFilter.ALBUMS,
+                    LibraryFilter.ARTISTS,
+                ),
             valueText = {
                 when (it) {
                     LibraryFilter.SONGS -> stringResource(R.string.songs)
@@ -628,16 +688,110 @@ fun AppearanceSettings(
     )
 }
 
+@Composable
+fun HyperOSListItem(
+    title: String,
+    value: String? = null,
+    onClick: (() -> Unit)? = null,
+    leadingContent: @Composable (() -> Unit)? = null,
+    trailingContent: @Composable (() -> Unit)? = null
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 64.dp)
+            .clickable(enabled = onClick != null) { onClick?.invoke() },
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (leadingContent != null) {
+                Box(modifier = Modifier.padding(end = 16.dp)) {
+                    leadingContent()
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (value != null) {
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
+            }
+            if (trailingContent != null) {
+                Box(modifier = Modifier.padding(start = 16.dp)) {
+                    trailingContent()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ThemePicker(
+    currentTheme: DarkMode,
+    onThemeSelected: (DarkMode) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        DarkMode.values().forEach { theme ->
+            val colors = when (theme) {
+                DarkMode.OFF -> listOf(Color(0xFFFFFFFF), Color(0xFFE0E0E0)) // White and light gray
+                DarkMode.ON -> listOf(Color(0xFF212121), Color(0xFF424242)) // Dark gray and darker gray
+                DarkMode.AUTO -> listOf(Color(0xFF4CAF50), Color(0xFF81C784)) // Green shades for system
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(colors[0])
+                    .border(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f), CircleShape)
+                    .clickable { onThemeSelected(theme) },
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(colors[1])
+                )
+                if (currentTheme == theme) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Selected Theme",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
 enum class DarkMode {
     ON, OFF, AUTO
 }
 
 enum class NavigationTabOld {
-    HOME, EXPLORE ,SONGS, ARTISTS, ALBUMS, PLAYLISTS
+    HOME, EXPLORE, SONGS, ARTISTS, ALBUMS, PLAYLISTS
 }
 
 enum class NavigationTab {
-     HOME, LIBRARY, EXPLORE ,SONGS, ARTISTS, ALBUMS, PLAYLISTS
+    HOME, LIBRARY, EXPLORE, SONGS, ARTISTS, ALBUMS, PLAYLISTS
 }
 
 enum class LyricsPosition {

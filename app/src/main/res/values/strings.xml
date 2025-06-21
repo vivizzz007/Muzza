@@ -543,4 +543,21 @@ DO NOT PANIC IF IT LOOKS STUCK; sometimes retrieval may take some time.</string>
     <string name="where_should_the_liked_songs">Where should the liked songs be imported?</string>
     <string name="new_playlist_named">A new playlist named "Liked Songs"</string>
     <string name="default_liked_songs">In the default "Liked Songs"</string>
+
+    //backup and restore
+    <string name="Warning">Warning</string>
+    <string name="Note">Important Message</string>
+    <string name="backup_warning">Please make sure you keep your backup file safe. It contains sensitive data!</string>
+    <string name="internal_backup">internal backup</string>
+
+//setting page
+    <string name="update">System Update</string>
+
+    //appearence page
+
+    <string name="app_theme">App Theme</string>
+    <string name="light_mode">Light Mode</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="follow_system">Follow System</string>
+
 </resources>

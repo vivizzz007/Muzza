@@ -39,6 +39,37 @@ import com.maloy.muzza.ui.component.SwitchPreference
 import com.maloy.muzza.ui.utils.backToMain
 import com.maloy.muzza.utils.rememberPreference
 
+import android.content.Context
+import android.content.SharedPreferences
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+
+import androidx.compose.ui.draw.clip
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
+
+import java.util.*
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrivacySettings(
@@ -123,13 +154,36 @@ fun PrivacySettings(
     ) {
         Spacer(Modifier.windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)))
 
+        var visible by remember { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+            visible = true
+        }
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.privacy))
+            LottieAnimation(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+        }
+
         PreferenceGroupTitle(
             title = stringResource(R.string.listen_history)
         )
 
         SwitchPreference(
             title = { Text(stringResource(R.string.pause_listen_history)) },
-            icon = { Icon(painterResource(R.drawable.history), null) },
+            icon = { Icon(painterResource(R.drawable.history_icon), null) },
             checked = pauseListenHistory,
             onCheckedChange = onPauseListenHistoryChange
         )
@@ -178,7 +232,7 @@ fun PrivacySettings(
                 onLongClick = navController::backToMain
             ) {
                 Icon(
-                    painterResource(R.drawable.arrow_back),
+                    painterResource(R.drawable.back_icon),
                     contentDescription = null
                 )
             }

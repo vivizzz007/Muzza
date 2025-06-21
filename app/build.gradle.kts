@@ -27,7 +27,7 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = 41
-        versionName = "0.6.9-rc-1"
+        versionName = "2.0.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -180,4 +180,29 @@ dependencies {
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.json)
+    implementation(libs.lottie.compose)
+
+    // Navigation Compose
+    implementation ("androidx.navigation:navigation-compose:2.7.7") // Use latest version
+
+    // Lottie
+    implementation ("com.airbnb.android:lottie-compose:6.3.0") // Use latest version
+
+    // Material3
+    implementation ("androidx.compose.material3:material3:1.2.1") // Use latest version
+    implementation ("androidx.compose.material3:material3:1.2.0")
+    implementation ("androidx.compose.material:material-icons-extended:1.6.2")
+    implementation ("androidx.compose.ui:ui:1.6.2")
+    implementation ("androidx.compose.material3:material3:1.2.0")
+
+    // For using Material icons
+    implementation ("androidx.compose.material:material-icons-core:1.6.2")
+    implementation ("androidx.compose.material:material-icons-extended:1.6.2")
+
+    // Activity Compose
+    implementation ("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.compose.material3:material3:1.2.0")
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+// or the latest version
+
 }

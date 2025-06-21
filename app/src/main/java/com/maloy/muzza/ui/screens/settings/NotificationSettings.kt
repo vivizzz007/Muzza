@@ -8,6 +8,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -44,6 +45,20 @@ import com.maloy.muzza.ui.component.SwitchPreference
 import com.maloy.muzza.ui.utils.backToMain
 import com.maloy.muzza.utils.rememberPreference
 import com.maloy.muzza.utils.reportException
+
+
+import com.airbnb.lottie.compose.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,12 +117,14 @@ fun NotificationSettings(
             }
         }
     }
+
     LaunchedEffect(keepAlive) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
             && context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             onKeepAliveChange(false)
         }
     }
+
     LaunchedEffect(Unit) {
         permissionGranted = checkNotificationPermission()
     }
@@ -117,6 +134,28 @@ fun NotificationSettings(
             .windowInsetsPadding(LocalPlayerAwareWindowInsets.current)
             .verticalScroll(rememberScrollState())
     ) {
+        var visible by remember { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+            visible = true
+        }
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.notification))
+            LottieAnimation(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+        }
 
         PreferenceGroupTitle(
             title = stringResource(R.string.notifications)
@@ -148,6 +187,7 @@ fun NotificationSettings(
             onCheckedChange = { toggleKeepAlive(it) }
         )
     }
+
     TopAppBar(
         title = { Text(stringResource(R.string.notifications_settings)) },
         navigationIcon = {

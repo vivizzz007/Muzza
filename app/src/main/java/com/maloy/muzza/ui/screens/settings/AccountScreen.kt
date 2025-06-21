@@ -43,6 +43,18 @@ import com.maloy.muzza.ui.component.SwitchPreference
 import com.maloy.muzza.ui.component.TextFieldDialog
 import com.maloy.muzza.ui.utils.backToMain
 import com.maloy.muzza.utils.rememberPreference
+import com.airbnb.lottie.compose.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,6 +83,32 @@ fun AccountSettings(
             .windowInsetsPadding(LocalPlayerAwareWindowInsets.current)
             .verticalScroll(rememberScrollState())
     ) {
+        Spacer(Modifier.height(10.dp))
+
+        // Lottie Animation Section
+        var visible by remember { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+            visible = true
+        }
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.login))
+            LottieAnimation(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+        }
+
         PreferenceGroupTitle(
             title = stringResource(R.string.account)
         )
@@ -161,14 +199,14 @@ fun AccountSettings(
                 navController.navigate("settings/import_from_spotify/ImportFromSpotify")
             }
         )
-        PreferenceGroupTitle(
-            title = stringResource(R.string.title_discord)
-        )
-        PreferenceEntry(
-            title = { Text(stringResource(R.string.discord_integration)) },
-            icon = { Icon(painterResource(R.drawable.discord), null) },
-            onClick = { navController.navigate("settings/discord") }
-        )
+//        PreferenceGroupTitle(
+//            title = stringResource(R.string.title_discord)
+//        )
+//        PreferenceEntry(
+//            title = { Text(stringResource(R.string.discord_integration)) },
+//            icon = { Icon(painterResource(R.drawable.discord), null) },
+//            onClick = { navController.navigate("settings/discord") }
+//        )
         PreferenceGroupTitle(
             title = stringResource(R.string.misc)
         )

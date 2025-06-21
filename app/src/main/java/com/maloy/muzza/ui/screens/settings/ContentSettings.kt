@@ -59,6 +59,22 @@ import java.net.Proxy
 import java.util.Locale
 import androidx.core.net.toUri
 import androidx.core.content.edit
+import com.airbnb.lottie.compose.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @SuppressLint("PrivateResource")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,6 +106,29 @@ fun ContentSettings(
                 )
             )
         )
+
+        var visible by remember { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+            visible = true
+        }
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.content))
+            LottieAnimation(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+        }
 
         PreferenceGroupTitle(
             title = stringResource(R.string.home)
@@ -251,7 +290,6 @@ fun saveLanguagePreference(context: Context, languageCode: String) {
     val sharedPreferences = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
     sharedPreferences.edit { putString("app_language", languageCode) }
 }
-
 
 fun updateLanguage(context: Context, languageCode: String) {
     val locale = Locale(languageCode)
